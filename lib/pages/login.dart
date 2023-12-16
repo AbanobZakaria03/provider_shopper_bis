@@ -16,7 +16,7 @@ class MyLogin extends StatelessWidget {
             children: [
               Text(
                 'Welcome',
-                style: Theme.of(context).textTheme.displayLarge,
+                style: Theme.of(context).textTheme.displayMedium,
               ),
               TextFormField(
                 decoration: const InputDecoration(

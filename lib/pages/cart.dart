@@ -42,17 +42,17 @@ class _CartList extends StatelessWidget {
     var cart = context.watch<CartModel>();
 
     return ListView.builder(
-      itemCount: cart.items.length,
+      itemCount: cart.products.length,
       itemBuilder: (context, index) => ListTile(
         leading: const Icon(Icons.done),
         trailing: IconButton(
           icon: const Icon(Icons.remove_circle_outline),
           onPressed: () {
-            cart.remove(cart.items[index]);
+            cart.remove(cart.products[index]);
           },
         ),
         title: Text(
-          cart.items[index].name,
+          cart.products[index].name,
           style: itemNameStyle,
         ),
       ),

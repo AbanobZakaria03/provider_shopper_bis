@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/catalog_model.dart';
+import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import 'cart.dart';
 
@@ -11,24 +11,68 @@ class MyCatalog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _MyAppBar(),
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                    (context, index) => _MyListItem(index)),
+      appBar: AppBar(
+        title: Text('Catalog', style: Theme.of(context).textTheme.displayLarge),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MyCart(),
+              ),
+            ),
           ),
         ],
+      ),
+      body: ListView.builder(
+        itemCount: Product.products.length,
+        itemBuilder: (context, index) =>
+            ProductWidget(product: Product.products[index]),
+      ),
+    );
+  }
+}
+
+class ProductWidget extends StatelessWidget {
+  final Product product;
+
+  const ProductWidget({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: LimitedBox(
+        maxHeight: 48,
+        child: Row(
+          children: [
+            AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(
+                  product.image,
+                  width: 200,
+                  height: 200,
+                )),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Text(
+                product.name,
+              ),
+            ),
+            const SizedBox(width: 24),
+            _AddButton( product: product,),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _AddButton extends StatelessWidget {
-  final Item item;
+  final Product product;
 
-  const _AddButton({required this.item});
+  const _AddButton({required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +84,7 @@ class _AddButton extends StatelessWidget {
     // This can lead to significant performance improvements.
     var isInCart = context.select<CartModel, bool>(
       // Here, we are only interested whether [item] is inside the cart.
-          (cart) => cart.items.contains(item),
+          (cart) => cart.products.contains(product),
     );
 
     return TextButton(
@@ -52,7 +96,7 @@ class _AddButton extends StatelessWidget {
         // is executed whenever the user taps the button. In other
         // words, it is executed outside the build method.
         var cart = context.read<CartModel>();
-        cart.add(item);
+        cart.add(product);
       },
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
@@ -65,61 +109,6 @@ class _AddButton extends StatelessWidget {
       child: isInCart
           ? const Icon(Icons.check, semanticLabel: 'ADDED')
           : const Text('ADD'),
-    );
-  }
-}
-
-class _MyAppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      title: Text('Catalog', style: Theme.of(context).textTheme.displayLarge),
-      floating: true,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.shopping_cart),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyCart(),)),
-        ),
-      ],
-    );
-  }
-}
-
-class _MyListItem extends StatelessWidget {
-  final int index;
-
-  const _MyListItem(this.index);
-
-  @override
-  Widget build(BuildContext context) {
-    var item = context.select<CatalogModel, Item>(
-      // Here, we are only interested in the item at [index]. We don't care
-      // about any other change.
-          (catalog) => catalog.getByPosition(index),
-    );
-    var textTheme = Theme.of(context).textTheme.titleLarge;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: LimitedBox(
-        maxHeight: 48,
-        child: Row(
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                color: item.color,
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Text(item.name, style: textTheme),
-            ),
-            const SizedBox(width: 24),
-            _AddButton(item: item),
-          ],
-        ),
-      ),
     );
   }
 }
